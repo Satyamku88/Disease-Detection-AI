@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuralCare AI - Healthcare Solutions for Rural Communities</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Your existing CSS styles */
+    </style>
+</head>
+<body>
+    <!-- Your existing HTML content -->
+
+    <!-- Add Google Maps Script -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+    <script>
+        // OpenRouter API Integration
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            const symptoms = document.getElementById('symptomInput').value;
+            const resultBox = document.querySelector('.result-box');
+            const loading = document.getElementById('loading');
+            const aiResult = document.getElementById('aiResult');
+
+            if (!symptoms.trim()) {
+                alert('Please describe your symptoms');
+                return;
+            }
+
+            try {
+                loading.style.display = 'block';
+                resultBox.style.display = 'none';
+
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer YOUR_OPENROUTER_API_KEY", // Replace with your API key
+                        "HTTP-Referer": window.location.href,
+                        "X-Title": "RuralCare AI",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "model": "google/gemma-2-9b-it:free",
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": `Analyze these symptoms: ${symptoms}. Respond ONLY with the most likely medical condition name in one line without explanations. Example: "Malaria" or "Influenza".`
+                            }
+                        ],
+                        "temperature": 1,
+                        "top_p": 1,
+                        "max_tokens": 50,
+                        "repetition_penalty": 1
+                    })
+                });
+
+                const data = await response.json();
+                if (data.choices?.[0]?.message?.content) {
+                    let diagnosis = data.choices[0].message.content;
+                    diagnosis = diagnosis.replace(/["']/g, '').trim();
+                    diagnosis = diagnosis.split('.')[0];
+                    diagnosis = diagnosis.charAt(0).toUpperCase() + diagnosis.slice(1);
+                    aiResult.textContent = diagnosis;
+                    resultBox.style.display = 'block';
+                } else {
+                    aiResult.textContent = "Could not analyze symptoms. Please try again.";
+                }
+            } catch (error) {
+                aiResult.textContent = "Service unavailable. Please try again later.";
+                resultBox.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        // Google Maps Integration
+        function initMap() {
+            const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Coordinates for India
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 6,
+                center: defaultLocation,
+            });
+            const marker = new google.maps.Marker({
+                position: { lat: 20.5937, lng: 78.9629 },
+                map: map,
+                title: "Medical Facility",
+            });
+        }
+    </script>
+</body>
+</html>
