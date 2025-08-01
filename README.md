@@ -21,7 +21,7 @@ RuralCare AI is a user-friendly platform that aims to bridge the gap in healthca
 
 ## Live Demo
 
-You can find a live demo of the application here: [***Your Live Demo Link Here***]
+You can find a live demo of the application here: [***[link](https://satyamku88.github.io/Disease-Detection-AI/)***]
 
 ## Technologies Used
 
